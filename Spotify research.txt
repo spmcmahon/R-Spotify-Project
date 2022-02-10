@@ -1,0 +1,76 @@
+ [1] "added_at"                           "is_local"                          
+ [3] "primary_color"                      "added_by.href"                     
+ [5] "added_by.id"                        "added_by.type"                     
+ [7] "added_by.uri"                       "added_by.external_urls.spotify"    
+ [9] "track.artists"                      "track.available_markets"           
+[11] "track.disc_number"                  "track.duration_ms"                 
+[13] "track.episode"                      "track.explicit"                    
+[15] "track.href"                         "track.id"                          
+[17] "track.is_local"                     "track.name"                        
+[19] "track.popularity"                   "track.preview_url"                 
+[21] "track.track"                        "track.track_number"                
+[23] "track.type"                         "track.uri"                         
+[25] "track.album.album_type"             "track.album.artists"               
+[27] "track.album.available_markets"      "track.album.href"                  
+[29] "track.album.id"                     "track.album.images"                
+[31] "track.album.name"                   "track.album.release_date"          
+[33] "track.album.release_date_precision" "track.album.total_tracks"          
+[35] "track.album.type"                   "track.album.uri"                   
+[37] "track.album.external_urls.spotify"  "track.external_ids.isrc"           
+[39] "track.external_urls.spotify"        "video_thumbnail.url"               
+[41] "danceability"                       "energy"                            
+[43] "key"                                "loudness"                          
+[45] "mode"                               "speechiness"                       
+[47] "acousticness"                       "instrumentalness"                  
+[49] "liveness"                           "valence"                           
+[51] "tempo"                              "type"                              
+[53] "id"                                 "track_href"                        
+[55] "analysis_url"                       "duration_ms"                       
+[57] "time_signature" 
+
+
+the good shit: 
+
+[9] ** track.artists  (problematic, needs function to extract) 
+
+[14] track.explicit (boolean T/F)
+
+[18] track.name
+
+[19] *track.popularity (integer < 100... not sure what it means)
+
+[21] track.track_number
+
+[31] track.album.name 
+[32] track.album.release_date
+
+
+
+
+
+[41]danceability
+energy
+key 
+loudness
+mode
+speechiness
+acousticness
+instrumentalness
+liveness
+valence
+[51] tempo 
+[56] duration_ms
+[57] time_signature
+
+
+# columns of interest
+c(9, 14, 18, 19, 21, 31, 32, 41:51, 56, 57)
+
+
+
+
+
+
+
+
+
