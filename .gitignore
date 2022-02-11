@@ -1,5 +1,9 @@
-#spotify API access 
+
+# spotify API tokens
 secrets.R 
+
+# data cache
+data/*
 
 # History files
 .Rhistory

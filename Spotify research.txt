@@ -28,25 +28,16 @@
 [55] "analysis_url"                       "duration_ms"                       
 [57] "time_signature" 
 
-
-the good shit: 
-
-[9] ** track.artists  (problematic, needs function to extract) 
+DESIRED COLUMNS:  
 
 [14] track.explicit (boolean T/F)
-
+[16] track.id 
 [18] track.name
-
 [19] *track.popularity (integer < 100... not sure what it means)
-
-[21] track.track_number
-
+[22] track.track_number     * highly inaccurate due to tracks being pulled from compilations 
+[25] track.album.album_type  * indicates of album, compilation, single, etc. 
 [31] track.album.name 
-[32] track.album.release_date
-
-
-
-
+[32] track.album.release_date   * highly inaccurate due to tracks being pulled from compilations 
 
 [41]danceability
 energy
@@ -61,16 +52,101 @@ valence
 [51] tempo 
 [56] duration_ms
 [57] time_signature
-
-
-# columns of interest
-c(9, 14, 18, 19, 21, 31, 32, 41:51, 56, 57)
-
+[58] year
+[59] artist
 
 
 
+Playlists: 
 
+'1955' = '5Dx8NDzwu00zsOIt0vVkQ9'
+'1956' = '47cq8xUO84TziuXwdogiZ4'
+'1957' = '4H6T3SOex4GJCSDuUIaAO6'
+'1958' = '7iOZS0hhVQ36NmDi96UJY5'
+'1959' = '14agTf2eM5eQbuDnEHfUyw'
 
+'1960' = '3G4HXHBA07kT05SrkjF9gC'
+'1961' = '7kTSKurwPKNOdseenwpnnL'
+'1962' = '2aYXRqQ94EGQAv5VkkVgsS'
+'1963' = '0Njl7iGQkbaveX8Nwnl6SY'
+'1964' = '4vmncHjirT0v0GyrONw26x'
+'1965' = '3hSRTB18CL0rySmHQZOTd9'
+'1966' = '1bqw3aB9lfWna30GlQGjmj'
+'1967' = '3YvggAfkmZQpGsezqa1LBa'
+'1968' = '3o515kLz17OpAJL6kt3H8b'
+'1969' = '2vHeQwkSZ82aOxmsDMKJ1D'
+
+'1970' = '5OcjS3AcrXGm0DRVOgHPgo',
+'1971' = '48Au8pYHrreyniidv9AX4X',
+'1972' = '7CIeE38SdXZ9J0M76QRhmS',
+'1973' = '4YqVByjHGu3grG3CZa1VKh',
+'1974' = '0ycWLvwxtT5LIfZXFBpNaY',
+'1975' = '0gbg9URi8NekuofjdERwa7',
+'1976' = '6StoAH35GDVgMzNldxnZTA',
+'1977' = '4o5cek3OBzJGYfnCBDpf6f',
+'1978' = '3mt2ysylQQ2cccDPyGfKID',
+'1979' = '6bHjBCFN8Lqj0K54RWFci8'
+
+'1980' = '7DCh6mOvaEGMVph25k7hyN',
+'1981' = '5wbHH4DqF4AVuGmjXI8kcW',
+'1982' = '1bk6tO6d5oes6n0vhACi5x',
+'1983' = '7GN1ulgzXBWpn5VADARkNd',
+'1984' = '1PGfIx39B5FnyHa1B9zEST',
+'1985' = '7fGtXiE8qbQzqEisHw5CLS',
+'1986' = '4rhgAIno9OiopUzNhOZDbc',
+'1987' = '3fniVM8pbMq8jcR23aVIY8',
+'1988' = '1LCUqaG3ZbFnpJweV1lrj1',
+'1989' = '6taan6n01bwB2B7EtN9KYI'
+
+'1990' = '2mI2QBJDL4klpigMkqaFs5',
+'1991' = '61FusglQju0yXpz3v7nYd5',
+'1992' = '0p6VwHqAZNV9xw5HuIKHJd',
+'1993' = '35wZqszdyXNFCAztyLWlgT',
+'1994' = '7A1EbS3Zux6zhXyeSpHEx9',
+'1995' = '5zYgmmRp9ozLstVry1JLbw',
+'1996' = '0YKbjLgCPsp7K3k2JH4NZw',
+'1997' = '6NewzRggzRDBBPowRuXBor',
+'1998' = '6RSRHtcA8MRpATzsi4XolB',
+'1999' = '2A8UXSOAFLAFdZ4fdOrwJC'
+
+'2000' = '6sBduygGNeCecOenI9ZZ2F',
+'2001' = '3aC9OQXALT39AwIsDt1FoE',
+'2002' = '4PKrJacjOzTGAs2X85Lk7q',
+'2003' = '3ZE5YJUjimJ6avd5qqyNog',
+'2004' = '1FtOhbe9MmxVq3yhU9AYzP',
+'2005' = '0zkjY0lqe24t46NYqR4227',
+'2006' = '1DJUcPQ4PwaiTsXPE0KfGg',
+'2007' = '3wU8xj1bC7JSG7aNKjeWAo',
+'2008' = '4eYNvmehJoJls9qaMtRzSA',
+'2009' = '1MMdvZO8NSzJkrGaQwOqdd'
+
+'2010' = '0yF6JCWDdrOa4HHiMqyPtO',
+'2011' = '7G6kv2oTKqa22dRe7wtYSL',
+'2012' = '2Inm8T8QcA90nbOGshxHLo',
+'2013' = '6qadCZBpEw9BRCKZ4bsJKT',
+'2014' = '5ohzMZ3OBvDlHypXCBKrHa',
+'2015' = '5PQypC2evM3DNjdGiHyuCQ',
+'2016' = '6BNqBWGaFvXpgIHgf6kgHF',
+'2017' = '1Pi3PakFUqghiLcASsYJpZ',
+'2018' = '6C8GBgqiWIzKCzCQBc2CSQ',
+'2019' = '6sxay2eKIKLxHCuytNSohv',
+'2020' = '1GIJsNcI4aLIm0ftqRFZVu',
+'2021' = '1bjAgktyYGqKJXynU4H8SO'
+
+Things to investigate: 
+popular keys (overall and over time)
+popular bpm 
+time signatures over time? 
+
+popularity and explicitness 
+relationship between dancability and bpm
+relationship between dancability and popularity 
+
+the rise and fall of speechiness (rap?)
+the rise and fall of intrumentalness 
+the rise and fall of liveness (folk?)
+most popular artists  (20-30)
+map their characteristics with spider graphs and compare
 
 
 
