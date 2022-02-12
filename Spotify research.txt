@@ -134,13 +134,49 @@ Playlists:
 '2021' = '1bjAgktyYGqKJXynU4H8SO'
 
 Things to investigate: 
-popular keys (overall and over time)
-popular bpm 
-time signatures over time? 
+
+key breakdown (prop)
+timesig breakdown (prop)
+
+bpm distribution
+duration 
+
+
+popularity of keys (overall and over time)
+
+
+
+
 
 popularity and explicitness 
-relationship between dancability and bpm
-relationship between dancability and popularity 
+relationships: 
+
+dancability vs bpm
+dancability vs valance
+valence vs bpm
+popularity vs valance
+popularity vs bpm
+
+
+
+
+
+
+
+by key (distribution)
+valance 
+bpm
+dancablity 
+energy
+
+
+by timesig (distribution)
+dancabilty 
+bpm 
+valence 
+energy
+
+
 
 the rise and fall of speechiness (rap?)
 the rise and fall of intrumentalness 
@@ -149,4 +185,43 @@ most popular artists  (20-30)
 map their characteristics with spider graphs and compare
 
 
+PITCH CLASSES
 
+Pitch
+class       Tonal counterparts                      Solfege
+
+0           C   (also B♯, Ddouble flat)             do
+1           C♯, D♭ (also Bdouble sharp) 
+2           D (also Cdouble sharp, Edouble flat)    re
+3           D♯, E♭ (also Fdouble flat)  
+4           E (also Ddouble sharp, F♭)              mi
+5           F (also E♯, Gdouble flat)               fa
+6           F♯, G♭ (also Edouble sharp) 
+7           G (also Fdouble sharp, Adouble flat)    sol
+8           G♯, A♭  
+9           A (also Gdouble sharp, Bdouble flat)    la
+10          A♯, B♭ (also Cdouble flat)  
+11          B (also Adouble sharp, C♭)              si
+
+
+TIME SIGNATURES: 
+
+3 = 3/4
+4 = 4/4 
+5 = 5/4
+6 = 6/4
+
+
+POPULARITY: (0,100) popularity of the artists based on popularity of all of their tracks
+
+
+address bad timesig: 1
+
+Elvis One Night - 4
+Kildare - 3
+Delilah - 3
+Money - 7
+
+
+backwards down the number line 
+'6LsK3oQhsBzp4Rc5DPW6p3'

@@ -1,5 +1,6 @@
 library(spotifyr)
 library(tidyverse)
+library(ggcorrplot)
 
 source('secrets.R')
 
@@ -87,9 +88,9 @@ playlists00 = list(
 playlists1020 = list(
   '2010' = '0yF6JCWDdrOa4HHiMqyPtO',
   '2011' = '7G6kv2oTKqa22dRe7wtYSL',
-  '2012' = '2Inm8T8QcA90nbOGshxHLo',
+  '2012' = '59B77qi1KbJQnXLPHQDwXh',
   '2013' = '6qadCZBpEw9BRCKZ4bsJKT',
-  '2014' = '5ohzMZ3OBvDlHypXCBKrHa',
+  '2014' = '1harArs7ZDwRr2YNtUIDj0',
   '2015' = '5PQypC2evM3DNjdGiHyuCQ',
   '2016' = '6BNqBWGaFvXpgIHgf6kgHF',
   '2017' = '1Pi3PakFUqghiLcASsYJpZ',
@@ -98,6 +99,10 @@ playlists1020 = list(
   '2020' = '1GIJsNcI4aLIm0ftqRFZVu',
   '2021' = '1bjAgktyYGqKJXynU4H8SO'
 )
+
+
+
+
 
 
 # build get_info function to take in playlist id's 
@@ -121,6 +126,7 @@ get_info = function(slst){
   
   for (i in 1:nrow(combo)){
     combo[i, 'artist'] = toString(combo$track.artists[[i]][3]$name)
+    
   }
   
   write_csv(combo, filename)
@@ -177,22 +183,118 @@ sub_bb = sub_bb %>% rename(album.type = track.album.album_type,
                   duration = duration_ms)
 
 
-# clean up NA's
 
 # sub_bb[rowSums(is.na(sub_bb)) > 0,] will show us which rows are problematic 
+# clean up NA's (only NA's were due to an overall import error for 1993)
+sub_bb = sub_bb[rowSums(is.na(sub_bb)) == 0,]
+
+
+
+
+# create second db remove songs that charted in more than one year (253)
+#  use distinct(artist, track.name, .keep_all = TRUE)
+
+#address some wonky timesig = 0 
+sub_bb[(sub_bb$artist=='Pink Floyd' & sub_bb$track.name=='Money - 2011 Remastered Version'),'timesig'] = 7
+sub_bb[sub_bb$artist=='Richard Chamberlain','timesig'] = 3
+sub_bb[sub_bb$track.name=='Delilah','timesig'] = 3
+sub_bb[sub_bb$timesig==1,'timesig'] = 4
 
 
 # convert key, timesig, & album.type  as factors
-#sub_bb$key = as.factor(sub_bb$key)
-#sub_bb$timesig = as.factor(sub_bb$timesig)
-#sub_bb$album.type = as.factor(sub_bb$album.type)
+sub_bb$key = as.factor(sub_bb$key)
+sub_bb$timesig = as.factor(sub_bb$timesig)
+sub_bb$album.type = as.factor(sub_bb$album.type)
 
 
-# release date to datetime ($ year? or year as factor?)
+# create tonal and decade columns:
+sub_bb = sub_bb %>% mutate(tonal = case_when(key == 0 ~ 'C', 
+                                    key == 1 ~ 'C# / Db', 
+                                    key == 2 ~ 'D', 
+                                    key == 3 ~ 'D# / Eb', 
+                                    key == 4 ~ 'E', 
+                                    key == 5 ~ 'F', 
+                                    key == 6 ~ 'F# / Gb',
+                                    key == 7 ~ 'G', 
+                                    key == 8 ~ 'G# / Ab',
+                                    key == 9 ~ 'A', 
+                                    key == 10 ~ 'A# / Bb', 
+                                    key == 11 ~ 'B'))
+
+sub_bb = sub_bb %>% mutate(decade = case_when(year < 1960 ~ 1950, 
+                                     year >= 1960 & year < 1970 ~ 1960, 
+                                     year >= 1970 & year < 1980 ~ 1970, 
+                                     year >= 1980 & year < 1990 ~ 1980, 
+                                     year >= 1990 & year < 2000 ~ 1990, 
+                                     year >= 2000 & year < 2010 ~ 2000, 
+                                     year >= 2010 & year <= 2021 ~ 2010))
+
+# Correlation between numeric factors
+
+num_features = c("danceability", "energy", "loudness", "speechiness", "acousticness" , "instrumentalness", 
+                 "liveness" , "valence" , "tempo" , "duration", "popularity")
+
+num_bb = sub_bb[, num_features]
+
+cors = cor(num_bb)
+  
+  
+# list of top artists: 
 
 
 
 
+  
+# the story of D#
+sub_bb %>% filter(key==3) %>% select(track.name, artist, year) %>% 
+  group_by(year) %>% count() 
+
+
+
+
+# plot of keys: 
+
+
+
+k <- sub_bb %>% group_by(tonal) %>% 
+  count() %>%
+  ggplot(aes(x = reorder(tonal, -n), y = n)) +
+  geom_col(aes(fill = tonal))
+
+t <- sub_bb %>% group_by(timesig) %>% count() %>% 
+  ggplot(aes(x = reorder(timesig, -n), y = n)) +
+  geom_col(aes(fill = timesig))
+# the fabulous case of Pink Floyd "Money" = 7/4
+
+bpm_dist <- 
+sub_bb %>% ggplot(aes(x=tempo)) + geom_density()
+# add vert lines for 120 and 98 bpm 
+
+#duration density 
+sub_bb %>% ggplot(aes(x=duration)) + geom_density()
+# add line at peak - ideal length of time 
+
+#correlation plot 
+ggcorrplot(cors, hc.order = TRUE, type = "lower",
+           outline.col = "white")
+
+#examine loudness vs energy
+#examine energy and loudness 
+#dancablity and valence 
+#valence and energy
+
+#dancability/valence/energy/duration - popularity? 
+
+#energy vs loudness 
+sub_bb %>% ggplot(aes(x=loudness, y=energy)) + 
+  geom_point() + geom_smooth()
+
+ 
+#dancability vs valence 
+sub_bb %>% ggplot(aes(x=valence, y=danceability)) + 
+  geom_point() + geom_smooth()
+
+sub_bb %>% ggplot(aes(x=valence, y=energy)) + geom_point()
 
 
 
