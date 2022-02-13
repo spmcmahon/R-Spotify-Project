@@ -1,6 +1,8 @@
 library(spotifyr)
 library(tidyverse)
 library(ggcorrplot)
+#library(hrbrthemes)
+library(viridis)
 
 source('secrets.R')
 
@@ -188,12 +190,6 @@ sub_bb = sub_bb %>% rename(album.type = track.album.album_type,
 # clean up NA's (only NA's were due to an overall import error for 1993)
 sub_bb = sub_bb[rowSums(is.na(sub_bb)) == 0,]
 
-
-
-
-# create second db remove songs that charted in more than one year (253)
-#  use distinct(artist, track.name, .keep_all = TRUE)
-
 #address some wonky timesig = 0 
 sub_bb[(sub_bb$artist=='Pink Floyd' & sub_bb$track.name=='Money - 2011 Remastered Version'),'timesig'] = 7
 sub_bb[sub_bb$artist=='Richard Chamberlain','timesig'] = 3
@@ -205,6 +201,7 @@ sub_bb[sub_bb$timesig==1,'timesig'] = 4
 sub_bb$key = as.factor(sub_bb$key)
 sub_bb$timesig = as.factor(sub_bb$timesig)
 sub_bb$album.type = as.factor(sub_bb$album.type)
+sub_bb$mode = as.factor(sub_bb$mode)
 
 
 # create tonal and decade columns:
@@ -221,6 +218,9 @@ sub_bb = sub_bb %>% mutate(tonal = case_when(key == 0 ~ 'C',
                                     key == 10 ~ 'A# / Bb', 
                                     key == 11 ~ 'B'))
 
+sub_bb = sub_bb %>% mutate(mode2 = case_when(mode == 0 ~ 'Minor', 
+                                    mode == 1 ~ 'Major'))
+
 sub_bb = sub_bb %>% mutate(decade = case_when(year < 1960 ~ 1950, 
                                      year >= 1960 & year < 1970 ~ 1960, 
                                      year >= 1970 & year < 1980 ~ 1970, 
@@ -229,78 +229,267 @@ sub_bb = sub_bb %>% mutate(decade = case_when(year < 1960 ~ 1950,
                                      year >= 2000 & year < 2010 ~ 2000, 
                                      year >= 2010 & year <= 2021 ~ 2010))
 
-# Correlation between numeric factors
 
-num_features = c("danceability", "energy", "loudness", "speechiness", "acousticness" , "instrumentalness", 
-                 "liveness" , "valence" , "tempo" , "duration", "popularity")
 
-num_bb = sub_bb[, num_features]
+# plot of keys: 
+k <- sub_bb %>% group_by(tonal) %>% 
+  count() %>%
+  ggplot(aes(x = reorder(tonal, -n), y = n)) +
+  geom_col(aes(fill = tonal), show.legend = FALSE) +
+  labs(title = 'Frequency of Keys', x = 'Key', 
+         y = 'Count')
 
-cors = cor(num_bb)
+# plot of modes (major 1, minor 0)
+sub_bb %>% group_by(mode2) %>% count() %>% 
+  ggplot(aes(x=mode2, y=n, fill = mode2)) + 
+  geom_col(show.legend=FALSE) + 
+  labs(title = "Frequency of Modes", x="Mode", y= "Count")
+
+
+# plot of keys/modes - dodged 
+sub_bb %>% group_by(tonal, mode2) %>% 
+  count() %>%
+  ggplot(aes(x= reorder(tonal, -n), y = n)) +
+  geom_col(aes(fill = mode2), position='dodge') +
+  labs(title="Frequency of Keys by Mode", x="Key", y='Count') +
+  guides(fill=guide_legend(title="Mode"))
+
+
+#stacked bar graph
+sub_bb %>% group_by(tonal, mode2) %>% 
+  count() %>%
+  ggplot(aes(x= reorder(tonal, -n), y = n)) +
+  geom_col(aes(fill = mode2)) +
+  labs(title="Frequency of Key & Mode", x="Key", y='Count') +
+  guides(fill=guide_legend(title="Mode"))
+
+# modes over time 
+sub_bb %>% group_by(year, mode2) %>% count() %>% 
+  ggplot(aes(x=year, y=n)) + 
+  geom_freqpoly(aes(color=mode2), stat='identity') + 
+  geom_smooth(aes(color=mode2)) + 
+  labs (title="Mode Frequency Over Time", 
+        x= 'Year', y= "Frequency") + 
+  guides(fill=guide_legend(title="Mode"))
+ 
   
-  
-# list of top artists: 
 
-
-
-
-  
-# the story of D#
+# the story of D#/Eb
 sub_bb %>% filter(key==3) %>% select(track.name, artist, year) %>% 
   group_by(year) %>% count() 
 
 
-
-
-# plot of keys: 
-
-
-
-k <- sub_bb %>% group_by(tonal) %>% 
-  count() %>%
-  ggplot(aes(x = reorder(tonal, -n), y = n)) +
-  geom_col(aes(fill = tonal))
-
+# by timesig
 t <- sub_bb %>% group_by(timesig) %>% count() %>% 
   ggplot(aes(x = reorder(timesig, -n), y = n)) +
-  geom_col(aes(fill = timesig))
+  geom_col(aes(fill = timesig), show.legend = FALSE) + 
+  labs(title="Frequency of Time Signature", 
+       x= "Time Signature", 
+       y= "Count")
 # the fabulous case of Pink Floyd "Money" = 7/4
+# this data is hella bad 
 
-bpm_dist <- 
-sub_bb %>% ggplot(aes(x=tempo)) + geom_density()
-# add vert lines for 120 and 98 bpm 
 
-#duration density 
-sub_bb %>% ggplot(aes(x=duration)) + geom_density()
-# add line at peak - ideal length of time 
 
-#correlation plot 
+
+# correlation plot (between numeric factors)
+
+num_features = c("danceability", "energy", "loudness", "speechiness", "acousticness" , "instrumentalness", 
+                 "liveness" , "valence" , "tempo" , "duration")
+
+num_bb = sub_bb[, num_features]
+
+cors = cor(num_bb)
 ggcorrplot(cors, hc.order = TRUE, type = "lower",
            outline.col = "white")
 
-#examine loudness vs energy
-#examine energy and loudness 
-#dancablity and valence 
-#valence and energy
 
-#dancability/valence/energy/duration - popularity? 
+# only real correlations: 
 
-#energy vs loudness 
+# energy vs loudness 
 sub_bb %>% ggplot(aes(x=loudness, y=energy)) + 
-  geom_point() + geom_smooth()
+  geom_point() 
 
- 
-#dancability vs valence 
+
+# dancability vs valence 
 sub_bb %>% ggplot(aes(x=valence, y=danceability)) + 
-  geom_point() + geom_smooth()
-
-sub_bb %>% ggplot(aes(x=valence, y=energy)) + geom_point()
+  geom_point()
 
 
+# tempo density
+bpm_dist <- 
+sub_bb %>% ggplot(aes(x=tempo)) + geom_density() + 
+  geom_vline(xintercept=122, size=0.75, color="red", 
+             linetype = "dashed") + 
+  geom_vline(xintercept=98, size=0.75, color="red", 
+             linetype = "dashed") 
+
+# tempo affects danceability 
+sub_bb %>% ggplot(aes(x=tempo, y=danceability)) + 
+  geom_bin2d(bins=30) +
+  theme_bw()
+
+# Overall danceability: 
+mean(sub_bb$danceability) # 0.621
+sd(sub_bb$danceability) #0.15
+# conf int. (0.321, 0.921)
+
+sub_bb %>% ggplot(aes(x=danceability)) + geom_density()
+
+sub_bb %>% ggplot(aes(x=valence, y=danceability)) + 
+  geom_bin2d(bins=20) +
+  theme_bw()
+
+sub_bb %>% ggplot(aes(x=tempo, y=valence)) + 
+  geom_bin2d(bins=20) +
+  theme_bw()
+
+
+
+# duration density 
+dur_dist <- 
+  sub_bb %>% ggplot(aes(x=duration)) + geom_density() + 
+  geom_vline(xintercept=230000, size=0.75, color="red", 
+             linetype = "dashed")+ 
+  labs(title = "Distribution of Song Lengths", 
+       x= "Duration (ms)", y = "Density")
+# add line at peak - ideal length of time (230000 ms ~ 3m50s)
+
+
+# overall density plots for all numeric factors
+sub_bb %>% ggplot(aes(x=valence)) + geom_density()
+sub_bb %>% ggplot(aes(x=energy)) + geom_density()
+sub_bb %>% ggplot(aes(x=loudness)) + geom_density()
+
+
+sub_bb %>% ggplot(aes(x=acousticness)) + geom_density()
+
+
+
+
+
+# key popularity over time: 
+  
+sub_bb %>% group_by(year, tonal) %>% count() %>% 
+  ggplot(aes(x=year, y=n)) + 
+  geom_freqpoly(aes(color=tonal), stat='identity', show.legend = FALSE) + 
+  facet_wrap(~tonal) + 
+  geom_smooth(aes(color=tonal)) + 
+  labs(title="Key Popularity Over Time", 
+        x= 'Year', y= "Frequency")
+
+
+# key/mode popularity over time
+
+sub_bb %>% group_by(year, tonal, mode2) %>% count() %>% 
+  ggplot(aes(x=year, y=n)) + 
+  geom_freqpoly(aes(color=mode2), stat='identity') + 
+  facet_wrap(~tonal) + 
+  geom_smooth(aes(color=mode2)) + 
+  labs (title="Key/Mode Popularity Over Time", 
+        x= 'Year', y= "Frequency") + 
+  guides(fill=guide_legend(title="Mode"))
 
 
 
 
 
 
-            
+# pop songs are getting sadder
+
+#overall valence 
+sub_bb %>% ggplot(aes(x=valence)) + geom_density() + 
+  labs(title = "Valence Distribution", x = 'Valence', y='Density' ) 
+
+# while tempo and danceability remained fairly constant over the years
+# the same cannot be said for valence 
+sub_bb %>% filter(decade != 1950) %>% ggplot(aes(x=valence)) + 
+  geom_density() + facet_wrap(~decade) + 
+  labs(title="Valence Distribution by Decade", 
+       x= 'Valence', y="Density")
+
+# valence by year 
+sub_bb %>% group_by(year) %>% summarize(avg_v= mean(valence)) %>%
+  ggplot(aes(x=year, y= avg_v)) + geom_freqpoly(stat='identity') + 
+  labs(title = "Average Valence by Year", x = "Year", y="Average Valence")
+
+
+# wait, but are popsongs in minor keys really sadder? 
+# average valence by mode: 
+sub_bb %>% group_by(mode2) %>% 
+  ggplot(aes(x=mode2, y= valence, fill = mode2)) + 
+  geom_boxplot()
+
+t.test(sub_bb$valence ~ sub_bb$mode2)
+#p-value = 9.459e-05
+#NO!!!! They aren't sadder, they aren't even equivalent
+# they are happier? 
+
+# f test
+var.test(sub_bb$valence ~ sub_bb$mode2, alternative = "two.sided")
+# the variances aren't equal... so our t test isn't really valid 
+# p-value = 0.01133
+
+# ok so they aren't necessarily happier...
+# but pop music certainly seems to be challenging convention
+
+
+
+
+
+
+
+
+
+#  is acousticness poised for a comeback? 
+sub_bb %>%  ggplot(aes(x=acousticness)) + 
+  geom_density() + labs(title = "Acousticness Distribution", 
+                        x="Acousticness", 
+                        y="Density")
+
+# not that prominant in pop, but that wasn't always the case
+
+sub_bb %>% filter(decade != 1950) %>% ggplot(aes(x=acousticness)) + 
+  geom_density() + facet_wrap(~decade) + 
+  labs(title="Acousticness by Decade", 
+       x= 'Acousticness', y="Density")
+
+# poised for a comeback? 
+sub_bb %>% group_by(year) %>% 
+  summarize(avg_v= mean(acousticness)) %>%
+  ggplot(aes(x=year, y= avg_v)) + 
+  geom_freqpoly(stat='identity') + 
+  labs(title= "Average Acousticness Over Time", x = "Year", 
+       y = "Average Acousticness")
+
+
+
+
+
+# what about speechiness? 
+sub_bb %>%  ggplot(aes(x=speechiness)) + 
+  geom_density() + labs(title = "Speechiness Distribution", 
+                        x="Speechiness", 
+                        y="Density")
+
+# historically not that prominent in pop music, but there is some shift
+sub_bb %>% filter(decade != 1950) %>% ggplot(aes(x=speechiness)) + 
+  geom_density() + facet_wrap(~decade) + 
+  labs(title="Speechiness by Decade", 
+       x= 'Speechiness', y="Density")
+
+# as hip hop and rap blend more and more into pop we can see a rise
+sub_bb %>% group_by(year) %>% 
+  summarize(avg_v= mean(speechiness)) %>%
+  ggplot(aes(x=year, y= avg_v)) + 
+  geom_freqpoly(stat='identity') + 
+  labs(title= "Average Speechiness Over Time", x = "Year", 
+       y = "Average Speechiness")
+
+
+
+
+
+
+
+
