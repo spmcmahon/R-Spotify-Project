@@ -235,15 +235,15 @@ sub_bb = sub_bb %>% mutate(decade = case_when(year < 1960 ~ 1950,
 k <- sub_bb %>% group_by(tonal) %>% 
   count() %>%
   ggplot(aes(x = reorder(tonal, -n), y = n)) +
-  geom_col(aes(fill = tonal), show.legend = FALSE) +
-  labs(title = 'Frequency of Keys', x = 'Key', 
+  geom_col(fill='#1DB954',  show.legend = FALSE) +
+  labs(title = 'Overall Frequency of Keys', x = 'Key', 
          y = 'Count')
 
 # plot of modes (major 1, minor 0)
 sub_bb %>% group_by(mode2) %>% count() %>% 
   ggplot(aes(x=mode2, y=n, fill = mode2)) + 
   geom_col(show.legend=FALSE) + 
-  labs(title = "Frequency of Modes", x="Mode", y= "Count")
+  labs(title = "Overall Frequency of Modes", x="Mode", y= "Count")
 
 
 # plot of keys/modes - dodged 
@@ -301,7 +301,7 @@ num_bb = sub_bb[, num_features]
 
 cors = cor(num_bb)
 ggcorrplot(cors, hc.order = TRUE, type = "lower",
-           outline.col = "white")
+           outline.col = "white") + labs(title="Correlation of Numeric Metrics")
 
 
 # only real correlations: 
@@ -322,27 +322,36 @@ sub_bb %>% ggplot(aes(x=tempo)) + geom_density() +
   geom_vline(xintercept=122, size=0.75, color="red", 
              linetype = "dashed") + 
   geom_vline(xintercept=98, size=0.75, color="red", 
-             linetype = "dashed") 
+             linetype = "dashed") + 
+  labs(title="Tempo Distribution", x= "Tempo (bpm)", y="Density")
 
 # tempo affects danceability 
 sub_bb %>% ggplot(aes(x=tempo, y=danceability)) + 
   geom_bin2d(bins=30) +
-  theme_bw()
+  theme_bw() + labs(title = 'Danceability vs. Tempo', 
+                    x="Tempo (bpm)", y = "Danceability [0,1]")
 
 # Overall danceability: 
 mean(sub_bb$danceability) # 0.621
 sd(sub_bb$danceability) #0.15
 # conf int. (0.321, 0.921)
+ 
 
-sub_bb %>% ggplot(aes(x=danceability)) + geom_density()
+#overall danceability 
+sub_bb %>% ggplot(aes(x=danceability)) + geom_density() + 
+  labs(title = "Overall Danceabilty Distribution", 
+       x = "Danceabilility [0,1]", y="Density")
 
-sub_bb %>% ggplot(aes(x=valence, y=danceability)) + 
-  geom_bin2d(bins=20) +
-  theme_bw()
+
+sub_bb %>% ggplot(aes(x=danceability, y=valence)) + 
+  geom_bin2d(bins=30) +
+  theme_bw() + labs(title = 'Danceability vs. Valence', 
+                    x="Valence [0,1]", y = "Danceability [0,1]")
 
 sub_bb %>% ggplot(aes(x=tempo, y=valence)) + 
-  geom_bin2d(bins=20) +
-  theme_bw()
+  geom_bin2d(bins=30) +
+  theme_bw() + labs(title = 'Valence vs. Tempo', 
+                    x="Tempo (bpm)", y = "Valence [0,1]")
 
 
 
@@ -376,7 +385,8 @@ sub_bb %>% group_by(year, tonal) %>% count() %>%
   facet_wrap(~tonal) + 
   geom_smooth(aes(color=tonal)) + 
   labs(title="Key Popularity Over Time", 
-        x= 'Year', y= "Frequency")
+        x= 'Year', y= "Frequency") + 
+  guides(fill=guide_legend(title="Mode"))
 
 
 # key/mode popularity over time
@@ -418,7 +428,8 @@ sub_bb %>% group_by(year) %>% summarize(avg_v= mean(valence)) %>%
 # average valence by mode: 
 sub_bb %>% group_by(mode2) %>% 
   ggplot(aes(x=mode2, y= valence, fill = mode2)) + 
-  geom_boxplot()
+  geom_boxplot(show.legend=FALSE) + 
+  labs(title="Valence by Mode", x = "Mode", y = "Valence")
 
 t.test(sub_bb$valence ~ sub_bb$mode2)
 #p-value = 9.459e-05
@@ -486,6 +497,9 @@ sub_bb %>% group_by(year) %>%
   labs(title= "Average Speechiness Over Time", x = "Year", 
        y = "Average Speechiness")
 
+
+sub_bb %>% group_by(year) %>% filter(speechiness> mean(speechiness)) %>% 
+  count() %>% arrange(desc(n))
 
 
 
