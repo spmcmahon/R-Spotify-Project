@@ -166,10 +166,12 @@ write.csv(mega_df, 'megabb.csv')
 
 # FILTERING & CLEANING:
 
+#alternate loading for csv: 
+mega_df = read.csv('megabb.csv')
 
 # select columns of interest: 
 
-keep_col_nums = c(14, 16, 18, 19, 22, 25, 31, 32, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 56, 57, 58, 59)
+keep_col_nums = c(14, 16, 18, 19, 22, 25, 31, 32, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 56, 57, 58, 59)
 
 sub_bb = mega_df[,keep_col_nums]
 
@@ -331,6 +333,17 @@ sub_bb %>% ggplot(aes(x=tempo, y=danceability)) +
   theme_bw() + labs(title = 'Danceability vs. Tempo', 
                     x="Tempo (bpm)", y = "Danceability [0,1]")
 
+
+# heat map with 98 - 120 bpm range indicated 
+sub_bb %>% ggplot(aes(x=tempo, y=danceability)) + 
+  geom_bin2d(bins=30) +
+  theme_bw() + labs(title = 'Danceability vs. Tempo', 
+                    x="Tempo (bpm)", y = "Danceability [0,1]") + 
+  geom_vline(xintercept=122, size=0.5, color="red", 
+             linetype = "dashed")
+\
+
+
 # Overall danceability: 
 mean(sub_bb$danceability) # 0.621
 sd(sub_bb$danceability) #0.15
@@ -342,16 +355,24 @@ sub_bb %>% ggplot(aes(x=danceability)) + geom_density() +
   labs(title = "Overall Danceabilty Distribution", 
        x = "Danceabilility [0,1]", y="Density")
 
+# doesn't change over decades (if anythign increases)
+sub_bb %>% ggplot(aes(x=danceability)) + geom_density() + 
+  labs(title = "Overall Danceabilty Distribution", 
+       x = "Danceabilility [0,1]", y="Density") + 
+  facet_wrap(~decade)
 
-sub_bb %>% ggplot(aes(x=danceability, y=valence)) + 
+# valence on daceablity 
+sub_bb %>% ggplot(aes(x=valence, y=danceability)) + 
   geom_bin2d(bins=30) +
   theme_bw() + labs(title = 'Danceability vs. Valence', 
                     x="Valence [0,1]", y = "Danceability [0,1]")
 
-sub_bb %>% ggplot(aes(x=tempo, y=valence)) + 
+
+# valence on tempo
+sub_bb %>% ggplot(aes(x=valence, y=tempo)) + 
   geom_bin2d(bins=30) +
-  theme_bw() + labs(title = 'Valence vs. Tempo', 
-                    x="Tempo (bpm)", y = "Valence [0,1]")
+  theme_bw() + labs(title = 'Tempo vs. Valence', 
+                    x="Valence [0,1]", y = "Tempo (bpm)")
 
 
 
@@ -444,11 +465,20 @@ var.test(sub_bb$valence ~ sub_bb$mode2, alternative = "two.sided")
 # ok so they aren't necessarily happier...
 # but pop music certainly seems to be challenging convention
 
+# tried looking at it with different time periods
+sub_bb %>% filter(year >=2000) %>% 
+  group_by(mode2) %>%
+  ggplot(aes(x=mode2, y= valence, fill = mode2)) + 
+  geom_boxplot(show.legend=FALSE) + 
+  labs(title="Valence by Mode", x = "Mode", y = "Valence")
 
+sub_bb %>% filter(year <= 1980) %>% 
+  group_by(mode2) %>%
+  ggplot(aes(x=mode2, y= valence, fill = mode2)) + 
+  geom_boxplot(show.legend=FALSE) + 
+  labs(title="Valence by Mode", x = "Mode", y = "Valence")
 
-
-
-
+# same situation - minor is higher? 
 
 
 
